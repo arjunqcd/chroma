@@ -17,12 +17,16 @@ namespace Chroma {
       success &= theQudaSolverTypeMap::Instance().registerPair(std::string("GCR"),GCR);
       success &= theQudaSolverTypeMap::Instance().registerPair(std::string("CA_GCR"),CA_GCR);
       success &= theQudaSolverTypeMap::Instance().registerPair(std::string("MR"),MR);
+      success &= theQudaSolverTypeMap::Instance().registerPair(std::string("EIGCG"),EIGCG);
+      success &= theQudaSolverTypeMap::Instance().registerPair(std::string("INC_EIGCG"),INC_EIGCG);
 
       success &= (theChromaToQudaSolverTypeMap::Instance())[CG] = QUDA_CG_INVERTER;
       success &= (theChromaToQudaSolverTypeMap::Instance())[BICGSTAB] = QUDA_BICGSTAB_INVERTER;
       success &= (theChromaToQudaSolverTypeMap::Instance())[GCR] = QUDA_GCR_INVERTER;
       success &= (theChromaToQudaSolverTypeMap::Instance())[CA_GCR] = QUDA_CA_GCR_INVERTER;
       success &= (theChromaToQudaSolverTypeMap::Instance())[MR] = QUDA_MR_INVERTER;
+      success &= (theChromaToQudaSolverTypeMap::Instance())[EIGCG] = QUDA_EIGCG_INVERTER;
+      success &= (theChromaToQudaSolverTypeMap::Instance())[INC_EIGCG] = QUDA_INC_EIGCG_INVERTER;
       return success;
     }
     const std::string typeIDString = "QudaSolverType";

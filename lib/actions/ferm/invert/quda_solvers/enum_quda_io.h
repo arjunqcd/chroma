@@ -23,7 +23,9 @@ namespace Chroma
     BICGSTAB,
     GCR,
 	CA_GCR,
-    MR
+    MR,
+    EIGCG,
+    INC_EIGCG
   };
 
   

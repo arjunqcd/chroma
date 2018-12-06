@@ -1401,10 +1401,12 @@ nobase_include_HEADERS +=  actions/ferm/invert/quda_solvers/syssolver_quda_wilso
 	actions/ferm/invert/quda_solvers/syssolver_quda_clover_params.h \
 	actions/ferm/invert/quda_solvers/syssolver_quda_multigrid_clover_params.h \
 	actions/ferm/invert/quda_solvers/syssolver_quda_nef_params.h \
+	actions/ferm/invert/quda_solvers/syssolver_quda_nef_eigcg_params.h \
 	actions/ferm/invert/quda_solvers/multi_syssolver_quda_clover_params.h \
 	actions/ferm/invert/quda_solvers/syssolver_linop_clover_quda_w.h \
 	actions/ferm/invert/quda_solvers/syssolver_linop_clover_quda_multigrid_w.h \
 	actions/ferm/invert/quda_solvers/syssolver_linop_nef_quda_w.h \
+	actions/ferm/invert/quda_solvers/syssolver_linop_nef_quda_eigcg_w.h \
 	actions/ferm/invert/quda_solvers/syssolver_linop_wilson_quda_w.h \
 	actions/ferm/invert/quda_solvers/syssolver_linop_wilson_quda_multigrid_w.h \
 	actions/ferm/invert/quda_solvers/syssolver_mdagm_clover_quda_w.h \
@@ -1426,12 +1428,14 @@ libchroma_a_SOURCES    += actions/ferm/invert/quda_solvers/enum_quda_io.cc \
 	actions/ferm/invert/quda_solvers/syssolver_quda_clover_params.cc \
 	actions/ferm/invert/quda_solvers/syssolver_quda_multigrid_clover_params.cc \
 	actions/ferm/invert/quda_solvers/syssolver_quda_nef_params.cc \
+	actions/ferm/invert/quda_solvers/syssolver_quda_nef_eigcg_params.cc \
 	actions/ferm/invert/quda_solvers/multi_syssolver_quda_clover_params.cc \
 	actions/ferm/invert/quda_solvers/syssolver_quda_wilson_params.cc \
 	actions/ferm/invert/quda_solvers/syssolver_quda_multigrid_wilson_params.cc \
 	actions/ferm/invert/quda_solvers/syssolver_linop_clover_quda_w.cc \
 	actions/ferm/invert/quda_solvers/syssolver_linop_clover_quda_multigrid_w.cc \
 	actions/ferm/invert/quda_solvers/syssolver_linop_nef_quda_w.cc \
+	actions/ferm/invert/quda_solvers/syssolver_linop_nef_quda_eigcg_w.cc \
 	actions/ferm/invert/quda_solvers/syssolver_linop_wilson_quda_w.cc \
 	actions/ferm/invert/quda_solvers/syssolver_linop_wilson_quda_multigrid_w.cc \
 	actions/ferm/invert/quda_solvers/syssolver_mdagm_clover_quda_w.cc \
