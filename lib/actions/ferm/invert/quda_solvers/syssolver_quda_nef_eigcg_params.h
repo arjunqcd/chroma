@@ -55,6 +55,19 @@ namespace Chroma
       dump_on_failP = p.dump_on_failP;
       cgnrP= p.cgnrP;
       Pipeline = p.Pipeline;
+      //Deflation params here:
+      nev = p.nev;
+      max_search_dim = p.max_search_dim;
+      deflation_grid = p.deflation_grid;
+      tol_restart = p.tol_restart;
+      eigcg_max_restarts = p.eigcg_max_restarts;
+      max_restart_num = p.max_restart_num;
+      inc_tol = p.inc_tol;
+      eigenval_tol = p.eigenval_tol;
+      solver_ext_lib = p.solver_ext_lib;
+      deflation_ext_lib = p.deflation_ext_lib;
+      location_ritz= p.location_ritz;
+      mem_type_ritz = p.mem_type_ritz;
     }
 
    

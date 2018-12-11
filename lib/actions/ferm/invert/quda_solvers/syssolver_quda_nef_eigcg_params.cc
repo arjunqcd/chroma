@@ -128,6 +128,44 @@ namespace Chroma {
     else { 
 	Pipeline = 1;
     }
+
+    //Deflation/eigcg params below.
+    
+    if( paramtop.count("nev") > 0 ) { 
+       read(paramtop, "nev", nev);
+    }
+    else { 
+	nev = 8;
+    }
+    if( paramtop.count("max_search_dim") > 0 ) { 
+       read(paramtop, "max_search_dim", max_search_dim);
+    }
+    else { 
+	max_search_dim = 64;
+    }
+    read(paramtop, "deflation_grid", deflation_grid);
+    read(paramtop, "tol_restart", tol_restart);
+    read(paramtop, "eigcg_max_restarts", eigcg_max_restarts);
+    if( paramtop.count("max_restart_num") > 0 ) { 
+       read(paramtop, "max_restart_num", max_restart_num);
+    }
+    else { 
+	max_restart_num = 3;
+    }
+    if( paramtop.count("inc_tol") > 0 ) { 
+       read(paramtop, "inc_tol", inc_tol);
+    }
+    else { 
+	inc_tol = 1e-2;
+    }
+    read(paramtop, "eigenval_tol", eigenval_tol);
+    
+    //The following 4 deflation params are set manually for now.
+    
+    solver_ext_lib = QUDA_EIGEN_EXTLIB; //If magma is installed, we should switch to that since it's faster.
+    deflation_ext_lib = QUDA_EIGEN_EXTLIB; //If magma is installed, we should switch to that since it's faster.
+    location_ritz = QUDA_CUDA_FIELD_LOCATION;
+    mem_type_ritz = QUDA_MEMORY_MAPPED;
   }
 
   void read(XMLReader& xml, const std::string& path, 
@@ -169,6 +207,16 @@ namespace Chroma {
       // I wonder if this method works....
       write(xml, "BackupSolverParam", tmp_reader);
     }
+    //Deflation stuff now
+    write(xml, "nev", p.nev);
+    write(xml, "max_search_dim", p.max_search_dim);
+    write(xml, "deflation_grid", p.deflation_grid);
+    write(xml, "tol_restart", p.tol_restart);
+    write(xml, "eigcg_max_restarts", p.eigcg_max_restarts);
+    write(xml, "max_restart_num", p.max_restart_num);
+    write(xml, "inc_tol", p.inc_tol);
+    write(xml, "eigenval_tol", p.eigenval_tol);
+
     pop(xml);
 
   }

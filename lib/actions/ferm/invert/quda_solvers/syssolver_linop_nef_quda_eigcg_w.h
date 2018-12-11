@@ -60,6 +60,22 @@ namespace Chroma
     typedef multi1d<LatticeColorMatrixF> QD;
 
     typedef WordType<T>::Type_t REALT;
+    
+    void setDeflationParam(QudaEigParam &df_param, const SysSolverQUDANEFEIGCGParams& invParam) {
+	
+      df_param.import_vectors = QUDA_BOOLEAN_NO;
+      df_param.run_verify     = QUDA_BOOLEAN_NO;
+
+      df_param.nk             = invParam.nev;
+      df_param.np             = invParam.nev*invParam.deflation_grid;
+      //df_param.extlib_type    = deflation_ext_lib;
+	
+      //Keep this cpu prec for now.
+      df_param.cuda_prec_ritz = cpu_prec;
+      df_param.location       = invParam.location_ritz;
+      df_param.mem_type_ritz  = invParam.mem_type_ritz;
+    }
+
     //! Constructor
     /*!
      * \param M_        Linear operator ( Read )
@@ -223,9 +239,13 @@ namespace Chroma
       quda_inv_param.dslash_type = QUDA_MOBIUS_DWF_DSLASH;
       // Invert type:
       switch( invParam.solverType ) { 
-      case CG: 
-	quda_inv_param.inv_type = QUDA_CG_INVERTER;
-	solver_string = "CG";
+      case EIGCG: 
+	quda_inv_param.inv_type = QUDA_EIGCG_INVERTER;
+	solver_string = "EIGCG_INVERTER";
+	break;
+      case INC_EIGCG: 
+	quda_inv_param.inv_type = QUDA_INC_EIGCG_INVERTER;
+	solver_string = "INC_EIGCG_INVERTER";
 	break;
       case BICGSTAB:
 	QDPIO::cerr << "Solver BICGSTAB not supported for MDWF" << std::endl;
@@ -269,33 +289,8 @@ namespace Chroma
       // Solution type
       quda_inv_param.solution_type = QUDA_MATPC_SOLUTION;
 
-      // Solve type, only CG-types supported so far:
-      switch( invParam.solverType ) { 
-      case CG:
-        if( invParam.cgnrP ) {
-          QDPIO::cout << "Doing CGNR solve" << std::endl;
-          quda_inv_param.solve_type = QUDA_NORMOP_PC_SOLVE;
-        }
-	else {
-          QDPIO::cout << "Doing CGNE solve" << std::endl; 
-  	  quda_inv_param.solve_type = QUDA_NORMERR_PC_SOLVE;
-        }
-
-	break;
-	
-      default:
-        if( invParam.cgnrP ) {
-          QDPIO::cout << "Doing CGNR solve" << std::endl;
-          quda_inv_param.solve_type = QUDA_NORMOP_PC_SOLVE;
-        }
-        else {
-          QDPIO::cout << "Doing CGNE solve" << std::endl;
-          quda_inv_param.solve_type = QUDA_NORMERR_PC_SOLVE;
-        }
-
-
-	break;
-      }
+      //This switch needs to change, for now I just copy one relevant line below.
+      quda_inv_param.solve_type = QUDA_NORMOP_PC_SOLVE;
 
       //only symmetric DWF supported at the moment:
       QDPIO::cout << "Using Symmetric Linop: A_oo - D_oe A^{-1}_ee D_eo" << std::endl;
@@ -305,6 +300,8 @@ namespace Chroma
       quda_inv_param.cpu_prec = cpu_prec;
       quda_inv_param.cuda_prec = gpu_prec;
       quda_inv_param.cuda_prec_sloppy = gpu_half_prec;
+      //Add preconditioner precision 
+      quda_inv_param.cuda_prec_precondition = cpu_prec;
       quda_inv_param.preserve_source = QUDA_PRESERVE_SOURCE_NO;
       quda_inv_param.gamma_basis = QUDA_DEGRAND_ROSSI_GAMMA_BASIS;
 
@@ -353,8 +350,31 @@ namespace Chroma
       quda_inv_param.maxiter_precondition = 1000;
       quda_inv_param.verbosity_precondition = QUDA_SILENT;
       quda_inv_param.gcrNkrylov = 1;
-      
- 
+
+      //We are going to be using a deflation as preconditioner, so comment out code above.
+
+      quda_inv_param.nev = invParam.nev;
+      quda_inv_param.max_search_dim = invParam.max_search_dim;
+      quda_inv_param.deflation_grid = invParam.deflation_grid;
+      quda_inv_param.tol_restart = invParam.tol_restart;
+      quda_inv_param.eigcg_max_restarts = invParam.eigcg_max_restarts;
+      quda_inv_param.max_restart_num = invParam.max_restart_num;
+      quda_inv_param.inc_tol = invParam.inc_tol;
+      quda_inv_param.eigenval_tol = invParam.eigenval_tol;
+
+      //Change solver type since eigcg or inc_eigcg are being used.
+      quda_inv_param.solve_type = QUDA_NORMOP_PC_SOLVE;
+       
+      //Keep this cpu prec for now.
+      quda_inv_param.cuda_prec_ritz = cpu_prec;
+      quda_inv_param.verbosity = QUDA_VERBOSE;
+      quda_inv_param.verbosity_precondition = QUDA_SILENT;
+      //This will match the solver type is either eigcg or inc_eigcg.
+      //quda_inv_param.inv_type_precondition = quda_inv_param.inv_type;
+      //quda_inv_param.gcrNkrylov = 6;
+      //Above is causing inner solve/preconditioning error.
+      //End deflation stuff
+
       if( invParam.verboseP ) { 
 	quda_inv_param.verbosity = QUDA_VERBOSE;
       }
@@ -376,15 +396,26 @@ namespace Chroma
 #endif
 
       loadGaugeQuda((void *)gauge, &q_gauge_param); 
+     
+      //More deflation stuff here:
       
+      QudaEigParam  df_param = newQudaEigParam();
+      df_param.invert_param = &quda_inv_param;
+      setDeflationParam(df_param, invParam);
+      
+      void *df_preconditioner  = newDeflationQuda(&df_param);
+      quda_inv_param.deflation_op   = df_preconditioner;
+
       END_CODE();
     }
+
     
 
     //! Destructor is automatic
     ~LinOpSysSolverQUDANEFEIGCG() 
     {
       QDPIO::cout << "Destructing" << std::endl;
+      //destroyDeflationQuda(df_preconditioner);
       freeGaugeQuda();
     }
 
